@@ -1,0 +1,52 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://postgres:5432/qmdm}
+    username: ${DB_USERNAME:qmdm_user}
+    password: ${DB_PASSWORD:qmdm_password}
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: false
+  
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:redispass}
+  
+  rabbitmq:
+    host: ${RABBITMQ_HOST:rabbitmq}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:qmdm}
+    password: ${RABBITMQ_PASSWORD:qmdm123}
+    virtual-host: ${RABBITMQ_VHOST:/}
+  
+  cloud:
+    stream:
+      bindings:
+        deviceCommand-out-0:
+          destination: device.commands
+          content-type: application/json
+        deviceEvent-in-0:
+          destination: device.events
+          content-type: application/json
+          group: qmdm-processor
+      rabbit:
+        bindings:
+          deviceCommand-out-0:
+            producer:
+              routing-key-expression: headers['deviceId']
+              required-groups: deviceCommands
+
+qmdm:
+  mqtt:
+    broker-url: ${MQTT_BROKER_URL:tcp://mosquitto:1883}
+    username: ${MQTT_USERNAME:qmdm}
+    password: ${MQTT_PASSWORD:qmdm123}
+    client-id: qmdm-server
+    topic-prefix: qmdm/
+    qos: 1
